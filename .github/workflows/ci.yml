@@ -7,32 +7,47 @@ on:
     branches:
     - main
 
+env:
+  PYTHON_VERSION: "3.12"
+
+
 jobs:
-  test:
-    name: Tests (Python ${{ matrix.python-version }})
+
+  lint:
+    name: Lint & Formatting
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      
+      - name: Ruff Lint
+        run: ruff check .
+      - name: Ruff Format Check
+        run: ruff format --check .
+  
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
     services:
       postgres:
-        image: postgres:16
 
+        image: postgres:16
         env:
           POSTGRES_DB: bookmarks_db
           POSTGRES_USER: bookmarkuser
           POSTGRES_PASSWORD: bookmarkuser123
-        ports:
-          - 5432:5432
+
+        ports: ["5432:5432"]
         
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-
+          --health-cmd pg_isready -- health-interval 10s
+          --health-timeout 5s --health-retries 5
+        
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
@@ -40,7 +55,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip                      # caches your pip downloads automatically
 
       - name: Install dependencies
@@ -48,23 +63,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Lint
-        run: |
-          ruff check .
+      - name: Django Deploy Checks
+        run: python manage.py check --deploy --fail-level WARNING
+      
+      - name: Missing Migrations?
+        run: python manage.py makemigrations --check --dry-run
 
-      - name: Check Formatting
-        run: |
-          ruff format --check .
 
-      - name: Run Migrations
-        env:
-          POSTGRES_DB: bookmarks_db
-          POSTGRES_USER: bookmarkuser
-          POSTGRES_PASSWORD: bookmarkuser123
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-        run: |
-          python manage.py migrate
+      # - name: Run Migrations
+      #   env:
+      #     POSTGRES_DB: bookmarks_db
+      #     POSTGRES_USER: bookmarkuser
+      #     POSTGRES_PASSWORD: bookmarkuser123
+      #     POSTGRES_HOST: localhost
+      #     POSTGRES_PORT: 5432
+      #   run: |
+      #     python manage.py migrate
 
 
       - name: Run tests
@@ -76,3 +90,22 @@ jobs:
           POSTGRES_PORT: 5432
         run: |
           pytest
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 7
+          
+  security:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install pip-audit
+      - run: pip-audit -r requirements.txt --strict
