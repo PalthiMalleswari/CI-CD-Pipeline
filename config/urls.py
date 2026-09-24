@@ -16,9 +16,10 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path,include
 from django.db import connection
 from django.http import JsonResponse
+from django.urls import include, path
+
 
 def healthz(request):
 
@@ -29,7 +30,6 @@ def healthz(request):
     except Exception:
         return JsonResponse({"status":"degraded"},status=503)
 
-from django.http import HttpResponse
 
 urlpatterns = [
 
