@@ -26,14 +26,13 @@ def healthz(request):
     try:
         with connection.cursor() as c:
             c.execute("SELECT 1")
-        return JsonResponse({"status":"ok"})
+        return JsonResponse({"status": "ok"})
     except Exception:
-        return JsonResponse({"status":"degraded"},status=503)
+        return JsonResponse({"status": "degraded"}, status=503)
 
 
 urlpatterns = [
-
-    path("healthz/",healthz),
+    path("healthz/", healthz),
     path("admin/", admin.site.urls),
-    path("api/",include("links.urls"))
+    path("api/", include("links.urls")),
 ]

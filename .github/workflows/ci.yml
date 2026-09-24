@@ -19,6 +19,7 @@ env:
 # Default permissions
 permissions:
   contents: read
+  packages: write
 
 
 jobs:

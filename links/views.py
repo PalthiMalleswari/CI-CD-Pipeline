@@ -10,8 +10,10 @@ from .serializers import BookmarkSerializer
 def bookmark_page(request):
     return render(request, "links/index.html")
 
+
 def home(request):
     return HttpResponse("Hello from Links app!")
+
 
 class BookmarkListCreateView(generics.ListCreateAPIView):
     queryset = Bookmark.objects.all()
