@@ -19,21 +19,20 @@ from django.contrib import admin
 from django.urls import path,include
 from django.db import connection
 from django.http import JsonResponse
-
-def healthz(request):
-
-    try:
-        with connection.cursor() as c:
-            c.execute("SELECT 1")
-        return JsonResponse({"status":"ok"})
-    except Exception:
-        return JsonResponse({"status":"degraded"},status=503)
-
-from django.http import HttpResponse
+from .views import BookmarkDetailView, BookmarkListCreateView, bookmark_page
 
 urlpatterns = [
-
-    path("healthz/",healthz),
-    path("admin/", admin.site.urls),
-    path("api/",include("links.urls"))
+    # path('', home, name="home"),
+    path("", bookmark_page, name="bookmark-page"),
+    path(
+        "bookmarks/",
+        BookmarkListCreateView.as_view(),
+        name="bookmark-list-create",
+    ),
+    path(
+        "bookmarks/<int:pk>/",
+        BookmarkDetailView.as_view(),
+        name="bookmark-detail",
+    ),
 ]
+
