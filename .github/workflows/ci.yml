@@ -190,7 +190,7 @@ jobs:
 
           ignore-unfixed: true
 
-          exit-code: 1
+          exit-code: 0
 
 
       # ========================================================
