@@ -41,6 +41,8 @@ COPY --chown=appuser:appuser . .
 # RUN SECRET_KEY=django-insecure-2y1v&1*xl_)hsln%p86d@d(#_#ix)-77o_0^owf&t-&ggp1qjc python manage.py collectstatic --noinput
 
 USER appuser
+RUN python manage.py collectstatic --noinput
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
