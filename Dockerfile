@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* \
 COPY . .
 
 # 2. Run collectstatic as root while providing a dummy SECRET_KEY for the compiler
-RUN SECRET_KEY=django-insecure-2y1v&1*xl_)hsln%p86d@d(#_#ix)-77o_0^owf&t-&ggp1qjc python bookmarks/manage.py collectstatic --noinput
+RUN SECRET_KEY='django-insecure-2y1v&1*xl_)hsln%p86d@d(#_#ix)-77o_0^owf&t-&ggp1qjc' python bookmarks/manage.py collectstatic --noinput
 
 # 3. Make the entrypoint script executable while still root
 RUN chmod +x /app/bookmarks/entrypoint.sh
