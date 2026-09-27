@@ -13,10 +13,10 @@ services:
       retries: 5
 
   web:
-    build: .
+    # 1. CHANGED: Swapped ':latest' for '${IMAGE_TAG}' with a fallback
+    image: ghcr.io/palthimalleswari/ci-cd-pipeline:${IMAGE_TAG:-latest}
     command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app                        # live reload — dev only, never in prod
+    # 2. REMOVED: Volumes mapping (.-:/app) should be removed in production CD pipelines
     ports:
       - "8000:8000"
     environment:
@@ -31,7 +31,7 @@ services:
       POSTGRES_PORT: "5432"
     depends_on:
       db:
-        condition: service_healthy    # waits for the healthcheck, not just for start
+        condition: service_healthy
 
 volumes:
   pgdata:
