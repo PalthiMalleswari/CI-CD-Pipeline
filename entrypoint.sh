@@ -4,7 +4,7 @@
 set -e
 
 # Move into the folder where manage.py lives
-cd /app/bookmarks
+cd /app
 
 echo "==> Running Database Migrations..."
 python manage.py migrate --noinput

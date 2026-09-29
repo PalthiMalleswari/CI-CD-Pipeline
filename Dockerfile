@@ -38,10 +38,10 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* \
 COPY . .
 
 # 2. Run collectstatic as root while providing a dummy SECRET_KEY for the compiler
-RUN SECRET_KEY='django-insecure-2y1v&1*xl_)hsln%p86d@d(#_#ix)-77o_0^owf&t-&ggp1qjc' python bookmarks/manage.py collectstatic --noinput
+RUN SECRET_KEY="build-only-dummy-secret" python manage.py collectstatic --noinput
 
 # 3. Make the entrypoint script executable while still root
-RUN chmod +x /app/bookmarks/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 # 4. Change the ownership of the entire /app directory (including static files) to appuser
 RUN chown -R appuser:appuser /app
@@ -56,4 +56,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
  CMD curl -fsS http://localhost:8000/healthz/ || exit 1
 
 # 7. Run the entrypoint script as the container boot sequence
-ENTRYPOINT ["/app/bookmarks/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]
